@@ -12,12 +12,12 @@
 // for convenience
 using json = nlohmann::json;
 
-// For converting back and forth between radians and degrees.
-
 constexpr double pi()
 {
     return M_PI;
 }
+
+// For converting back and forth between radians and degrees.
 
 double deg2rad(double x)
 {
@@ -49,11 +49,22 @@ string hasData(string s)
 
 // Evaluate a polynomial's derivative.
 
-double polyeval_derivative(Eigen::VectorXd coeffs, double x)
+double eval_derivative(Eigen::VectorXd coeffs, double x)
 {
     double result = 0.0;
     for (int i = 1; i < coeffs.size(); i++) {
         result += coeffs[i] * i * pow(x, i - 1);
+    }
+    return result;
+}
+
+// Evaluate a polynomial.
+
+double polyeval(Eigen::VectorXd coeffs, double x)
+{
+    double result = 0.0;
+    for (int i = 0; i < coeffs.size(); i++) {
+        result += coeffs[i] * pow(x, i);
     }
     return result;
 }
@@ -85,15 +96,6 @@ Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals,
 }
 
 int main()
-{
-    Eigen::VectorXd state(3);
-    state << 0, 1, 2;
-
-    cout << polyeval_derivative(state, 0);
-
-}
-
-int main0()
 {
     uWS::Hub h;
 
@@ -183,21 +185,21 @@ int main0()
                 msgJson["steering_angle"] = steer_value;
                 msgJson["throttle"] = throttle_value;
 
-                // Display the MPC latencyicted trajectory
+                // Display the MPC predicted trajectory
                 vector<double> mpc_x_vals;
                 vector<double> mpc_y_vals;
 
                 // add (x,y) points to list here, points are in reference to the vehicle's coordinate system
                 // the points in the simulator are connected by a Green line
 
-                /*
-                                                                mpc_x_vals.push_back(state[0]);
-                                                                mpc_y_vals.push_back(state[1]);
-                                                                for (int i = 2; i < vars.size(); i += 2) {
-                                                                mpc_x_vals.push_back(vars[i]);
-                                                                mpc_y_vals.push_back(vars[i + 1]);
-                                                                                                                        }
-                             */
+
+                mpc_x_vals.push_back(state[0]);
+                mpc_y_vals.push_back(state[1]);
+                for (int i = 2; i < vars.size(); i += 2) {
+                mpc_x_vals.push_back(vars[i]);
+                mpc_y_vals.push_back(vars[i + 1]);
+                    }
+
 
                 msgJson["mpc_x"] = mpc_x_vals;
                 msgJson["mpc_y"] = mpc_y_vals;
@@ -211,12 +213,11 @@ int main0()
                 double poly_inc = 2.5;
                 int num_points = 25;
 
-                /*
-                                                                for (int i = 1; i < num_points; i++) {
-                                                                next_x_vals.push_back(poly_inc * i);
-                                                                next_y_vals.push_back(polyeval(coeffs, poly_inc * i));
-                                                                    }
-                             */
+                for (int i = 1; i < num_points; i++) {
+                next_x_vals.push_back(poly_inc * i);
+                next_y_vals.push_back(polyeval(coeffs, poly_inc * i));
+                    }
+
 
                 msgJson["next_x"] = next_x_vals;
                 msgJson["next_y"] = next_y_vals;
