@@ -48,9 +48,9 @@ is the vehicle starting offset of a straight line (reference). If the MPC implem
 4.  Tips for setting up your environment are available [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
 5. **VM Latency:** Some students have reported differences in behavior using VM's ostensibly a result of latency.  Please let us know if issues arise as a result of a VM environment.
 
-## Model Predective Control (MPC)
+## Model Predictive Control (MPC)
 
-Model Predective Control (MPC) is a technoligy for advanced process control. MPC models can represent complex behavioral dynamics of a system. For the purpose of autonomous driving, if the problem of following a desired trajectory could be formulated as an optimization problem w.r.t the actuator values, we can then use an MPC to control the vehicle autonomously.
+Model Predictive Control (MPC) is a technoligy for advanced process control. MPC models can represent complex behavioral dynamics of a system. For the purpose of autonomous driving, if the problem of following a desired trajectory could be formulated as an optimization problem w.r.t the actuator values, we can then use an MPC to control the vehicle autonomously.
 
 ## The Model
 
@@ -64,7 +64,7 @@ The simulator provides the following data as an input to the program:
 5. `steering_angle`, current steering angle of the vehicle (radians)
 6. `throttle`, current throttle value
 
-The coordinates sent by the simulator are global coordinates of the map used by the simulator. These must be transformed to the vehicle's coordinates for convenicence of computation of the error costs. This is done as follows:
+The coordinates sent by the simulator are global coordinates of the map used by the simulator. These must be transformed to the vehicle's coordinates for convenience of computation of the error costs. This is done as follows:
 
 ```c++
 for (int i = 0; i < ptsx.size(); i++) {
@@ -76,7 +76,7 @@ for (int i = 0; i < ptsx.size(); i++) {
 ```
 This essentially puts the vehicle at the origin with its face to the right horizontally.
 
-Once the waypoints are transformed, the `polyfit()` function is used to obtain the coefficients of a polynomial curve of degree 3 that best fits the waypoints. Ideally, this is the trajectory that the vehicle should follow to stay on the track. Now the cross track error is simply the derivetive of the polynomial and the psi error is the negative arc tangent of the derivative of the polynomial. But, since by the vehicle's cooridinates, the vehicle is at the origin, the derivative of the curve is simply the second coefficient, i.e. coefficient of the term of order 1.
+Once the waypoints are transformed, the `polyfit()` function is used to obtain the coefficients of a polynomial curve of degree 3 that best fits the waypoints. Ideally, this is the trajectory that the vehicle should follow to stay on the track. Now the cross track error is simply the derivative of the polynomial and the psi error is the negative arc tangent of the derivative of the polynomial. But, since by the vehicle's coordinates, the vehicle is at the origin, the derivative of the curve is simply the second coefficient, i.e. coefficient of the term of order 1.
 
 ### Dealing With Latency 
 
@@ -102,7 +102,7 @@ These values are then passed on to the model for solving using the `MPC::Solve()
 
 The goal is to make the vehicle follow the ideal trajectory by reducing the cross-track-error (cte) and the psi error (epsi) without causing severe constraint on speed and preventing sudden changes in steering; it must be a fast as well as a smooth ride. The parameters and weights mentioned below are the final weights adopted after a rigorous manual tuning.
 
-Cost based on the current reference state includes the cte and epsi, both squared to eleminate (-)ve sign. The weights assigned to each are 5500 and 7500 respectively. It is also important to penalize for not maintaining some adequate velocity until the destination is reached. I incorporated the speed error as follows:
+Cost based on the current reference state includes the cte and epsi, both squared to eliminate (-)ve sign. The weights assigned to each are 5500 and 7500 respectively. It is also important to penalize for not maintaining some adequate velocity until the destination is reached. I incorporated the speed error as follows:
 
 ```c++
 // costs pertaining to not maintaining the velocities.
@@ -117,7 +117,7 @@ fg[0] += 0.2 * CppAD::pow(vars[v_start + t] - 30, 2);
 ```
 What that above code does is, it penalizes for speed being too low, as well as speed being too high. So the speed settles down somewhere in between. Otherwise if only a single reference velocity is chosen, the vehicle's speed becomes too erratic as the speed overshoots the reference velocity, comes down due to the error, goes up again, overshoots, and the cycle continues. This also prevents the speed from rising drastically high.
 
-To avoid too frequent use of actuators or otherwise, I added squared errors for steering angle and acceleration with an weightage of 5 each. It must also be noted that a large steering angle should be accompanied by a lower velocity. Similar argument holds for cte and epsi. Hence I added the following additional costs:
+To avoid too frequent use of actuators or otherwise, I added squared errors for steering angle and acceleration with an weight of 5 each. It must also be noted that a large steering angle should be accompanied by a lower velocity. Similar argument holds for cte and epsi. Hence I added the following additional costs:
 
 ```c++
 // additional costs for having high velocity
@@ -130,7 +130,7 @@ fg[0] += 50 * CppAD::pow(vars[delta_start + t] * vars[v_start + t], 2);
 
 ```
 
-Finally, to prevent sudden changes, I included squared errors for the change of the actuator values i.e. for steering and acceleration with weightages of 100 and 10 respectively.
+Finally, to prevent sudden changes, I included squared errors for the change of the actuator values i.e. for steering and acceleration with weights of 100 and 10 respectively.
 
 The `MPC::Solve()` method is responsible for optimizing the actuator values. The constraints of actuations are defined here as follows:
 
