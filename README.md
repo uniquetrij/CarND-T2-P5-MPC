@@ -78,6 +78,8 @@ This essentially puts the vehicle at the origin with its face to the right horiz
 
 Once the waypoints are transformed, the `polyfit()` function is used to obtain the coefficients of a polynomial curve of degree 3 that best fits the waypoints. Ideally, this is the trajectory that the vehicle should follow to stay on the track. Now the cross track error is simply the derivetive of the polynomial and the psi error is the negative arc tangent of the derivative of the polynomial. But, since by the vehicle's cooridinates, the vehicle is at the origin, the derivative of the curve is simply the second coefficient, i.e. coefficient of the term of order 1.
 
+### Dealing With Latency 
+
 A 100 ms latency is introduced in the program. The following equations describe the predicted latency state:
 
 ```c++
@@ -94,7 +96,7 @@ double latency_epsi = epsi + speed * -steering_angle / Lf * latency;
 
 ```
 
-These values are then passed on to the model for solving using the `Solve()` method.
+These values are then passed on to the model for solving using the `MPC::Solve()` method.
 
 ### Designing The Error Cost Function
 
@@ -130,7 +132,7 @@ fg[0] += 50 * CppAD::pow(vars[delta_start + t] * vars[v_start + t], 2);
 
 Finally, to prevent sudden changes, I included squared errors for the change of the actuator values i.e. for steering and acceleration with weightages of 100 and 10 respectively.
 
-The MPC::Solve() method is responsible for optimizing the actuator values. The constraints of actuations are defined here as follows:
+The `MPC::Solve()` method is responsible for optimizing the actuator values. The constraints of actuations are defined here as follows:
 
 1. steering angle:  -0.436332 to 0.436332 radians (-25 to 25 degrees)
 
@@ -138,9 +140,19 @@ The MPC::Solve() method is responsible for optimizing the actuator values. The c
 
 3. others (non actuators): -1.0e19 to 1.0e19 (max -ve to max +ve)
 
-4. non-initial state: 0
+4. all non-initial state: 0
 
 Finally, I used `ipopt::solve()` to obtain the optimized actuation values.
+
+## Timestep Length and Elapsed Duration (N & dt)
+
+Initially I felt that predicting for a longer duration will produce better results, but when I executed the program on the simulator, the results were otherwise. I selected various combinations on (N, dt) such as (25, 0.05), (20,0.1), (20, 0.05), (15, 0.1), (12,0.1), (5,0.05)and so on. What I realized that greater N is causing the model to slow down, while reducing dt was causing the model to preform worse. Eventually the optimal I could get was by using (N=10, dt=0.1) which essentially was a prediction for 1 second.
+
+## Conclusion
+
+The final model was able to drive the vehicle correctly in the simulator with speed reaching over 90 miles an hour. The ride was smooth and there were no sudden jerks or turns. The vehicle always stayed on track. [Here](https://github.com/uniquetrij/CarND-T2-P5-MPC/blob/master/result.mp4) is a video of the simulation results.
+
+
 
 
 
