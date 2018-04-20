@@ -1,0 +1,7 @@
+# build files
+build/
+
+# netbeans config
+nbproject/
+
+Ipopt-3.12.7/
