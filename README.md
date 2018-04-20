@@ -1,6 +1,8 @@
 # CarND-Controls-MPC
 Self-Driving Car Engineer Nanodegree Program
 
+A video of the final simulation result can be found [here](https://github.com/uniquetrij/CarND-T2-P5-MPC/blob/master/result.mp4)
+
 ---
 
 ## Dependencies
